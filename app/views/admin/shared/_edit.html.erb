@@ -4,3 +4,15 @@
   <%= render :partial => "form" %>
 
 <% end %>
+
+<!-- Merge articles form -->
+<% if @article.persisted? %>
+  <div>
+    <h4> <%= _("Merge Articles")%> </h4>
+  </div>
+  <%= form_tag(merge_article_path) do %>
+      <%= label_tag :merge_with %>
+      <%= text_field_tag :merge_with %>
+      <%= submit_tag 'Merge' %>
+  <% end %>
+<% end %>
