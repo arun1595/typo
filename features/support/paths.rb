@@ -24,6 +24,11 @@ module NavigationHelpers
     when /the article edit page of '(.+)'/
       article_id = Article.find_by_title($1).id
       "/admin/content/edit/#{article_id}"
+    when /admin content page/
+      '/admin/content'
+    when /the article page of '(.+)'/
+      article = Article.find_by_title($1)
+      article.short_url
 
 
     # Add more mappings here.

@@ -671,4 +671,48 @@ describe Admin::ContentController do
 
     end
   end
+
+  describe 'merge action' do
+    let(:user) { FactoryGirl.create(:user) }
+    let(:article) { FactoryGirl.create(:article, user: user) }
+    let(:other_article) { FactoryGirl.create(:article, body: 'body of another article', user: user) }
+
+    context 'valid article to merge with' do
+      it 'redirects to admin content path' do
+        post :merge, { id: article.id, merge_with: other_article.id }
+        expect(response).to redirect_to(admin_content_path)
+      end
+
+      it 'sets the flash' do
+        post :merge, { id: article.id, merge_with: other_article.id }
+        expect(flash[:notice]).to eql('Articles merged successfully')
+      end
+    end
+
+    context 'invalid article' do
+      before do
+        post :merge, { id: 12233, merge_with: other_article.id }
+      end
+
+      it 'redirects to the admin content_path' do
+        expect(response).to redirect_to(admin_content_path)
+      end
+
+      it 'sets the error flash message' do
+        expect(flash[:error]).to eql('Article does not exist')
+      end
+    end
+
+    context 'invalid article to merge with' do
+      it 'redirects to admin content path' do
+        post :merge, { id: article.id, merge_with: 122344 }
+        expect(response).to redirect_to({ controller: 'admin/content'})
+      end
+
+      it 'sets the flash' do
+        post :merge, { id: article.id, merge_with: other_article.id }
+        expect(flash[:error]).to eql('Could not be merged as the other article does not exist')
+      end
+    end
+  end
 end

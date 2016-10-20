@@ -3,6 +3,7 @@ require 'base64'
 module Admin; end
 class Admin::ContentController < Admin::BaseController
   layout "administration", :except => [:show, :autosave]
+  before_filter :require_admin!, only: [:merge]
 
   cache_sweeper :blog_sweeper
 
@@ -38,7 +39,21 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def merge
-    render text: params
+    @article = Article.find_by_id(params[:id])
+    other_article_id = params[:merge_with]
+    if @article
+      if @article.merge other_article_id
+        flash[:notice] = 'Articles merged successfully'
+        redirect_to admin_content_path
+      else
+        flash[:error] = 'Could not be merged as the other article does not exist'
+        redirect_to controller: 'admin/content', action: 'edit', id: @article.id
+      end
+    else
+      flash[:error] = 'Article does not exist'
+      redirect_to admin_content_path
+      return
+    end
   end
 
   def destroy
@@ -243,5 +258,11 @@ class Admin::ContentController < Admin::BaseController
 
   def setup_resources
     @resources = Resource.by_created_at
+  end
+
+  private
+
+  def require_admin!
+    redirect_to root_path unless current_user.admin?
   end
 end
